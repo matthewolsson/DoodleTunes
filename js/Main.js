@@ -1,6 +1,6 @@
 "use strict"
 
-var c,ctx,img,playMusicBtn,findNotesBtn,musicPlaying,fps,count,difference,sensitivity;
+var c,ctx,img,playMusicBtn,findNotesBtn,musicPlaying,fps,count,difference,sensitivity,topLeftOfTune,bottomRightOfTune,stick;
 
 window.onload = init;
 
@@ -30,6 +30,8 @@ function init(){
     count = 0;
     difference = 0;
     sensitivity = 180; // higher is less sensitive
+    topLeftOfTune = {x:999,y:999};
+    bottomRightOfTune = {x:0,y:0};
 
     main();
 }
@@ -37,6 +39,9 @@ function init(){
 function imageIsLoaded(e) {
     $('#myImg').attr('src', e.target.result);
     ctx.clearRect(0,0,c.width,c.height);
+
+    topLeftOfTune = {x:999,y:999};
+    bottomRightOfTune = {x:0,y:0};
 
     drawImage();
 }
@@ -63,15 +68,46 @@ function searchForNotes(){
                 // leave them alone
             }
             else {
+                // sets the top left and bottom right of the picture
+                if((i%(imageData.width*4))/4 < topLeftOfTune.x){
+                    topLeftOfTune.x = (i%(imageData.width*4))/4;
+                }
+                if((i/(imageData.width*4)) < topLeftOfTune.y){
+                    topLeftOfTune.y = (i/(imageData.width*4)); 
+                }
+                if((i%(imageData.width*4))/4 > bottomRightOfTune.x){
+                    bottomRightOfTune.x = (i%(imageData.width*4))/4; 
+                }
+                if((i/(imageData.width*4)) > bottomRightOfTune.y){
+                    bottomRightOfTune.y = (i/(imageData.width*4)); 
+                }
                 imageData.data[i] = 0;
-                imageData.data[i+1] = 255;
+                imageData.data[i+1] = 255; // make green
                 imageData.data[i+2] = 0;
             }
         }
     }
     console.log("done");
+
     ctx.putImageData(imageData,2,2);
-    // find rectangle
+    ctx.beginPath();
+    ctx.arc(topLeftOfTune.x, topLeftOfTune.y, 3, 0, 2 * Math.PI, false);
+    ctx.fillStyle = 'green';
+    ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(bottomRightOfTune.x, bottomRightOfTune.y, 3, 0, 2 * Math.PI, false);
+    ctx.fillStyle = 'red';
+    ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.closePath();
+
+    stick = new Stick(ctx,topLeftOfTune.x,topLeftOfTune.y,(bottomRightOfTune.y-topLeftOfTune.y),(bottomRightOfTune.x-topLeftOfTune.x));
+
     // find notes
     console.log("searchForNotes");
 }
@@ -79,8 +115,8 @@ function searchForNotes(){
 function main(){
     if(musicPlaying){
         count++;
-        update();
         draw();
+        update();
     }
     if(count >= 240){
         count = 0;
@@ -93,18 +129,20 @@ function main(){
 }
 
 function update(){
-    // update music stick
+    stick.update();
 }
 
 function draw(){
     ctx.clearRect(0,0,c.width,c.height);
     drawImage();
-    // draw music stick
+    stick.draw();
 }
 
 function drawImage(){
-    ctx.strokeStyle = 'black';
-    ctx.rect(0,0,c.width,c.height);
-    ctx.stroke();
     ctx.drawImage(img,2,2, c.width-4, c.height-4)
+    ctx.beginPath();
+    ctx.strokeStyle = 'black';
+    ctx.rect(0,0,c.width,c.height); // border
+    ctx.stroke();
+    ctx.closePath();
 }
