@@ -91,7 +91,7 @@ function searchForNotes(){
 
     ctx.putImageData(imageData,2,2);
     ctx.beginPath();
-    ctx.arc(topLeftOfTune.x, topLeftOfTune.y, 3, 0, 2 * Math.PI, false);
+    ctx.arc(topLeftOfTune.x+2, topLeftOfTune.y+2, 3, 0, 2 * Math.PI, false);
     ctx.fillStyle = 'green';
     ctx.fill();
     ctx.lineWidth = 1;
@@ -99,14 +99,14 @@ function searchForNotes(){
     ctx.closePath();
 
     ctx.beginPath();
-    ctx.arc(bottomRightOfTune.x, bottomRightOfTune.y, 3, 0, 2 * Math.PI, false);
+    ctx.arc(bottomRightOfTune.x+2, bottomRightOfTune.y+2, 3, 0, 2 * Math.PI, false);
     ctx.fillStyle = 'red';
     ctx.fill();
     ctx.lineWidth = 1;
     ctx.stroke();
     ctx.closePath();
 
-    stick = new Stick(ctx,topLeftOfTune.x,topLeftOfTune.y,(bottomRightOfTune.y-topLeftOfTune.y),(bottomRightOfTune.x-topLeftOfTune.x));
+    stick = new Stick(ctx,topLeftOfTune.x+2,topLeftOfTune.y+2,(bottomRightOfTune.y-topLeftOfTune.y),(bottomRightOfTune.x-topLeftOfTune.x));
 
     // find notes
     console.log("searchForNotes");
