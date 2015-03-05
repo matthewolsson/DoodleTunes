@@ -32,9 +32,9 @@ function init(){
     count = 0;
     difference = 0;
     greySensitivity = 180; // higher is less sensitive
-    noteSensitivity = 4; // lower is less sensitive (must be an increment of 4)
-    topLeftOfTune = {x:999,y:999};
-    bottomRightOfTune = {x:0,y:0};
+    noteSensitivity = 8; // lower is less sensitive (must be an increment of 4)
+    topLeftOfTune = {x:999,y:999,xindex:0,yindex:0,index:0};
+    bottomRightOfTune = {x:0,y:0,xindex:0,yindex:0,index:0};
     foundPixels = [];
 
     main();
@@ -68,12 +68,20 @@ function searchForNotes(){
         if(testPixel(imageData,foundPixels[i])){
             detectCorners(imageData,foundPixels[i]); // sets the top left and bottom right of the picture
         }
+    }
+    calculateCornerIndexes(imageData,topLeftOfTune,bottomRightOfTune);
+
+    // exclude top, bottom, left, and right bars --- foundPixels should be shorter by now
+    for(var i = 0; i < foundPixels.length; i++){
         // looks for pixels that meet note qualifications (tests below, above, right, and left) NEEDS OPTIMIZING
         if(testPixel(imageData,(foundPixels[i]+noteSensitivity))){ // checks to the right
             if(testPixel(imageData,(foundPixels[i]-noteSensitivity))){ // checks to the left
                 if(testPixel(imageData,(foundPixels[i]+(imageData.width*noteSensitivity)))){ // checks below
                     if(testPixel(imageData,(foundPixels[i]-(imageData.width*noteSensitivity)))){ // checks above
-                        processNotePosition(imageData,foundPixels[i]) // Not implemented   
+                        //processNotePosition(imageData,foundPixels[i]) // Not implemented
+                        imageData.data[foundPixels[i]] = 255;
+                        imageData.data[foundPixels[i]+1] = 0; // make green
+                        imageData.data[foundPixels[i]+2] = 0;   
                     }
                 }
             }
@@ -84,21 +92,22 @@ function searchForNotes(){
     console.log("done");
 
     ctx.putImageData(imageData,2,2);
-    ctx.beginPath();
+    
+    /*ctx.beginPath();
     ctx.arc(topLeftOfTune.x+2, topLeftOfTune.y+2, 3, 0, 2 * Math.PI, false);
     ctx.fillStyle = 'green';
     ctx.fill();
     ctx.lineWidth = 1;
     ctx.stroke();
-    ctx.closePath();
+    ctx.closePath();*/
 
-    ctx.beginPath();
+    /*ctx.beginPath();
     ctx.arc(bottomRightOfTune.x+2, bottomRightOfTune.y+2, 3, 0, 2 * Math.PI, false);
     ctx.fillStyle = 'red';
     ctx.fill();
     ctx.lineWidth = 1;
     ctx.stroke();
-    ctx.closePath();
+    ctx.closePath();*/
 
     stick = new Stick(ctx,topLeftOfTune.x+2,topLeftOfTune.y+2,(bottomRightOfTune.y-topLeftOfTune.y),(bottomRightOfTune.x-topLeftOfTune.x));
 
@@ -106,9 +115,38 @@ function searchForNotes(){
     console.log("searchForNotes");
 }
 
+function calculateCornerIndexes(imageData,topLeftOfTune,bottomRightOfTune){
+    var tempx = Math.floor(topLeftOfTune.yindex/(imageData.width*4));
+    var tempy = Math.floor(topLeftOfTune.xindex/(imageData.width*4));
+    var difference = tempy-tempx;
+    topLeftOfTune.index = topLeftOfTune.xindex-(difference*(imageData.width*4));
+
+    imageData.data[topLeftOfTune.index] = 0;
+    imageData.data[topLeftOfTune.index+1] = 0; // make green
+    imageData.data[topLeftOfTune.index+2] = 255; 
+
+    tempx = Math.floor(bottomRightOfTune.yindex/(imageData.width*4));
+    tempy = Math.floor(bottomRightOfTune.xindex/(imageData.width*4));
+    difference = tempy-tempx;
+    bottomRightOfTune.index = bottomRightOfTune.xindex-(difference*(imageData.width*4));
+
+    imageData.data[bottomRightOfTune.index] = 0;
+    imageData.data[bottomRightOfTune.index+1] = 0; // make green
+    imageData.data[bottomRightOfTune.index+2] = 255; 
+    
+    drawBoundingBox(imageData,topLeftOfTune,bottomRightOfTune);
+}
+
 function testPixel(imageData,index){
-    if(imageData.data[index] === 0 && imageData.data[index+1] === 255 && imageData.data[index+2] === 0){ return true; }
-    else { return false; }
+    if(imageData.data[index] === 255 && imageData.data[index+1] === 0 && imageData.data[index+2] === 0){ return true; }
+    else{
+        if(imageData.data[index] === 0 && imageData.data[index+1] === 255 && imageData.data[index+2] === 0){ return true; }
+        else{return false;}
+    }
+}
+
+function drawBoundingBox(imageData,topLeftOfTune,bottomRightOfTune){
+    
 }
 
 function flagPixels(imageData,index){
@@ -136,21 +174,24 @@ function flagPixels(imageData,index){
 function detectCorners(imageData,index){
     if((index%(imageData.width*4))/4 < topLeftOfTune.x){
         topLeftOfTune.x = (index%(imageData.width*4))/4;
+        topLeftOfTune.xindex = index;
     }
     if((index/(imageData.width*4)) < topLeftOfTune.y){
-        topLeftOfTune.y = (index/(imageData.width*4)); 
+        topLeftOfTune.y = (index/(imageData.width*4));
+        topLeftOfTune.yindex = index;
     }
     if((index%(imageData.width*4))/4 > bottomRightOfTune.x){
-        bottomRightOfTune.x = (index%(imageData.width*4))/4; 
+        bottomRightOfTune.x = (index%(imageData.width*4))/4;
+        bottomRightOfTune.xindex = index;
     }
     if((index/(imageData.width*4)) > bottomRightOfTune.y){
-        bottomRightOfTune.y = (index/(imageData.width*4)); 
+        bottomRightOfTune.y = (index/(imageData.width*4));
+        bottomRightOfTune.yindex = index;
     }
 }
 
 // When a pixel is detected that has a pixel above, left, right, and below it that are also detected then it's put here for processing, In this function the program jumps up in horizontal line an arbitrary width to find the top of the note, then do the same thing down to find the bottom of the note, then left along a line the height of the note to find the left, and right to do the same. Then assign the center of the note to be the center of the created rectangle, and white the whole note out so it doesn't get caught again when the program continues to run. 
 function processNotePosition(imageData,index){
-    debugger;
 }
 
 function main(){
