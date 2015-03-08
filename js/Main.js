@@ -2,7 +2,7 @@
 
 "use strict"
 
-var c,ctx,img,playMusicBtn,findNotesBtn,musicPlaying,fps,frameCount,difference,greySensitivity,stick,noteSensitivity,allFoundPixels,boundingBox,noteArray;
+var c,ctx,img,playMusicBtn,findNotesBtn,musicPlaying,fps,frameCount,difference,greySensitivity,stick,noteSensitivity,allFoundPixels,boundingBox,noteArray,imageData,notePixels,note;
 
 window.onload = init;
 
@@ -35,6 +35,9 @@ function init(){
     noteSensitivity = 8; // lower is less sensitive (must be an increment of 4)
     allFoundPixels = [];
     noteArray = [];
+    note = {};
+    notePixels = [];
+    imageData = {};
     boundingBox = {topLeft:{x:999,xIndex:0,y:999,yIndex:0,index:0},bottomRight:{x:0,xIndex:0,y:0,yIndex:0,index:0},height:0,width:0};
 
     main();
@@ -52,6 +55,9 @@ function resetEverything(){
     difference = 0;
     allFoundPixels = [];
     noteArray = [];
+    note = {};
+    notePixels = [];
+    imageData = {};
     boundingBox = {topLeft:{x:999,xIndex:0,y:999,yIndex:0,index:0},bottomRight:{x:0,xIndex:0,y:0,yIndex:0,index:0},height:0,width:0};
 }
 
@@ -63,7 +69,7 @@ function playMusic(){
 
 function searchForNotes(){
     // array of all pixels in image, 4 indexes for each pixel. R,G,B,A - for loop indexes by pixel not value
-    var imageData = ctx.getImageData(2,2,c.width-4,c.height-4);
+    imageData = ctx.getImageData(2,2,c.width-4,c.height-4);
 
     for(var i = 0; i < imageData.data.length; i+=4){
         flagPixels(imageData,i); // colors all pixels that aren't white or black, green.
@@ -80,11 +86,12 @@ function searchForNotes(){
 
     for(var i = 0; i < allFoundPixels.length; i++){
         if(testForNotePixel(allFoundPixels[i])){ // if a note has been found
-            findAllPixelsInNote(startingPixel,imageData,noteArray) // find all the pixels in that note and calculate its center
+            findAllPixelsInNote(allFoundPixels[i]) // find all the pixels in that note and calculate its center
+            //imageData.data[allFoundPixels[i]] = 255;
+            //imageData.data[allFoundPixels[i]+1] = 0;
+            //imageData.data[allFoundPixels[i]+2] = 0;
         }
     }
-
-    for(var i = 0; )
 
     // for debugging purposes, eventually combine find notes into play music
     console.log("done");
@@ -100,7 +107,7 @@ function searchForNotes(){
     console.log("searchForNotes");
 }
 
-function testForNotePixel(imageData,index){
+function testForNotePixel(index){
     if(!(imageData.data[index] === 255 && imageData.data[index+1] === 0 && imageData.data[index+2] === 0)){
         if(testPixel(imageData,(index+noteSensitivity))){ // checks to the right
             if(testPixel(imageData,(index-noteSensitivity))){ // checks to the left
@@ -198,6 +205,19 @@ function detectCorners(imageData,index){
 }
 
 function main(){
+    // calculate and draw centers of notes
+    for(var i = 0; i < noteArray.length; i++){
+        noteArray[i].center = {x:0,y:0};
+        noteArray[i].center.x = 3+(noteArray[i].left + (noteArray[i].right-noteArray[i].left)/2);
+        noteArray[i].center.y = 2+(noteArray[i].top + (noteArray[i].bottom-noteArray[i].top)/2);
+        ctx.beginPath();
+        ctx.lineWidth = 1;
+        ctx.fillStyle = 'purple';
+        ctx.arc(noteArray[i].center.x, noteArray[i].center.y, 1, 0, Math.PI*2, true);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fill();
+    }
     if(musicPlaying){
         frameCount++;
         draw();
