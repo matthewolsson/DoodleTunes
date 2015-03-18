@@ -2,7 +2,7 @@
 
 "use strict"
 
-var c,ctx,img,playMusicBtn,findNotesBtn,musicPlaying,fps,frameCount,difference,greySensitivity,stick,noteSensitivity,allFoundPixels,boundingBox,noteArray,imageData,notePixels,note;
+var c,ctx,img,playMusicBtn,findNotesBtn,musicPlaying,fps,frameCount,difference,greySensitivity,stick,noteSensitivity,allFoundPixels,boundingBox,noteArray,imageData,notePixels,note,borderSensitivity;
 
 window.onload = init;
 
@@ -25,7 +25,6 @@ function init(){
     findNotesBtn=document.getElementById("findNotes");
     findNotesBtn.onclick = searchForNotes;
 
-
     musicPlaying = false;
     img.hidden = true;
     fps = 60;
@@ -33,6 +32,7 @@ function init(){
     difference = 0;
     greySensitivity = 180; // higher is less sensitive
     noteSensitivity = 8; // lower is less sensitive (must be an increment of 4)
+    borderSensitivity = 10; // lower is less sensitive, excludes note pixels by boundary
     allFoundPixels = [];
     noteArray = [];
     note = {};
@@ -82,19 +82,15 @@ function searchForNotes(){
     }
     calculateCornerIndexes(imageData,boundingBox); // calculates the pixel position and actual x and y of the corners/draws bounding box
 
-    // exclude top, bottom, left, and right bars --- allFoundPixels should be shorter by now
+    removeBorderNotes();// exclude top, bottom, left, and right bars --- allFoundPixels should be shorter by now
 
     for(var i = 0; i < allFoundPixels.length; i++){
         if(testForNotePixel(allFoundPixels[i])){ // if a note has been found
             findAllPixelsInNote(allFoundPixels[i]) // find all the pixels in that note and calculate its center
-            //imageData.data[allFoundPixels[i]] = 255;
-            //imageData.data[allFoundPixels[i]+1] = 0;
-            //imageData.data[allFoundPixels[i]+2] = 0;
         }
     }
 
-    // for debugging purposes, eventually combine find notes into play music
-    console.log("done");
+    removeDuplicates(noteArray);
 
     ctx.putImageData(imageData,2,2);
 
@@ -107,12 +103,31 @@ function searchForNotes(){
     console.log("searchForNotes");
 }
 
+function removeBorderNotes(){ // removes highlighted pixels around the edges of the screen from being considered for notes
+    var temp = allFoundPixels.length;
+    for(var i = 0; i < temp; i++){
+        if((boundingBox.topLeft.index + borderSensitivity*imageData.width*4) > allFoundPixels[i]){
+            delete allFoundPixels[i];
+        }
+        if((boundingBox.bottomRight.index - borderSensitivity*imageData.width*4) < allFoundPixels[i]){
+            delete allFoundPixels[i];
+        }
+        if(((boundingBox.topLeft.index%(imageData.width*4)) + borderSensitivity*4) > (allFoundPixels[i]%(imageData.width*4))){
+            delete allFoundPixels[i];
+        }
+        if(((boundingBox.bottomRight.index%(imageData.width*4)) - borderSensitivity*4) < (allFoundPixels[i]%(imageData.width*4))){
+            delete allFoundPixels[i];
+        }
+    }
+    allFoundPixels = allFoundPixels.filter(function(n){ return n != undefined }); // removes undefined values
+}
+
 function testForNotePixel(index){
     if(!(imageData.data[index] === 255 && imageData.data[index+1] === 0 && imageData.data[index+2] === 0)){
-        if(testPixel(imageData,(index+noteSensitivity))){ // checks to the right
-            if(testPixel(imageData,(index-noteSensitivity))){ // checks to the left
-                if(testPixel(imageData,(index+(imageData.width*noteSensitivity)))){ // checks below
-                    if(testPixel(imageData,(index-(imageData.width*noteSensitivity)))){ // checks above
+        if(testPixel(imageData,(index+noteSensitivity+4))){ // checks to the right
+            if(testPixel(imageData,(index-noteSensitivity-4))){ // checks to the left
+                if(testPixel(imageData,(index+(imageData.width*(noteSensitivity-8))))){ // checks below
+                    if(testPixel(imageData,(index-(imageData.width*(noteSensitivity-8))))){ // checks above
                         return(true);
                     }
                 }
@@ -207,9 +222,6 @@ function detectCorners(imageData,index){
 function main(){
     // calculate and draw centers of notes
     for(var i = 0; i < noteArray.length; i++){
-        noteArray[i].center = {x:0,y:0};
-        noteArray[i].center.x = 3+(noteArray[i].left + (noteArray[i].right-noteArray[i].left)/2);
-        noteArray[i].center.y = 2+(noteArray[i].top + (noteArray[i].bottom-noteArray[i].top)/2);
         ctx.beginPath();
         ctx.lineWidth = 1;
         ctx.fillStyle = 'purple';

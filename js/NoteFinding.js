@@ -1,8 +1,11 @@
 "use strict"
 
 function findAllPixelsInNote(startingPixel){ // finds and stores the rest of the pixels in a note
-    note = {left:0,right:0,top:0,bottom:0,center:0};
+    note = {left:0,right:0,top:0,bottom:0,center:{x:0,y:0}};
     examineRows(startingPixel);
+
+    note.center.x = 3+(note.left + (note.right-note.left)/2);
+    note.center.y = 2+(note.top + (note.bottom-note.top)/2);
     noteArray.push(note);
 }
 
@@ -53,9 +56,37 @@ function LookLeft(pixel){
         LookLeft(pixel-4);
     }
 }
+
 function LookRight(pixel){
     if(testForNotePixel(pixel)){ // if the pixel to the left is part of the note
         notePixels.push(pixel);
         LookRight(pixel+4);
     }
+}
+// if two notes are right next to eachother then delete them and create one between them. This should get rid of multiple notes being detected on just one.
+function removeDuplicates(){
+    for(var i = 0; i < noteArray.length; i++){
+        if(noteArray[i] != undefined){
+            for(var k = i+1; k < noteArray.length; k++){
+                if(noteArray[k] != undefined){
+                    var tempX = 0;
+                    var tempY = 0;
+                    tempX = (noteArray[i].center.x - noteArray[k].center.x)*(noteArray[i].center.x - noteArray[k].center.x);
+                    tempY = (noteArray[i].center.y - noteArray[k].center.y)*(noteArray[i].center.y - noteArray[k].center.y);
+                    var temp = Math.sqrt(tempX + tempY);
+                    if(temp < 10){ // if the two notes are too close together
+                        var tempNote = {left:0,right:0,top:0,bottom:0,center:{x:0,y:0}};
+                        tempNote.center.x = (noteArray[i].center.x-noteArray[k].center.x)/2 + noteArray[k].center.x;
+                        tempNote.center.y = (noteArray[i].center.y-noteArray[k].center.y)/2 + noteArray[k].center.y;
+                        delete noteArray[k];
+                        delete noteArray[i];
+                        noteArray.push(tempNote);
+                        i = -1;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    noteArray = noteArray.filter(function(n){ return n != undefined }); // removes undefined values
 }
