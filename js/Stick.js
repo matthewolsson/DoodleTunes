@@ -13,7 +13,7 @@ var Stick = function(ctx,x,y,height,width){
 		ctx.beginPath();
 		ctx.strokeStyle = 'purple';
 		ctx.fillStyle = 'purple';
-		ctx.rect(this.x,this.y,5,this.height);
+		ctx.rect(this.x,this.y,3,this.height);
 		ctx.stroke();
 		ctx.fill();
 		ctx.closePath();

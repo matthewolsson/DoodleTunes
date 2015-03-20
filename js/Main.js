@@ -63,11 +63,18 @@ function resetEverything(){
 
 // 4 seconds with 16 beats. (2 measures of 4/4 time)
 function playMusic(){
+    assignNotes();
+    setNoteTimers();
     musicPlaying = true;
     console.log("MusicPlayingStart");
+    var d = new Date();
+    console.log(d.getSeconds() + ":" + d.getMilliseconds());
 }
 
 function searchForNotes(){
+    var piano = Synth.createInstrument('piano');
+    piano.play('D', 5, 2);
+
     // array of all pixels in image, 4 indexes for each pixel. R,G,B,A - for loop indexes by pixel not value
     imageData = ctx.getImageData(2,2,c.width-4,c.height-4);
 
@@ -235,10 +242,17 @@ function main(){
         draw();
         update();
     }
+    if(frameCount%60 === 0){
+        var d = new Date();
+        console.log(d.getSeconds() + ":" + d.getMilliseconds());
+    }
     if(frameCount >= 240){
         frameCount = 0;
         musicPlaying = false;
         console.log("MusicPlayingFinish");
+        var d = new Date();
+        console.log(d.getSeconds() + ":" + d.getMilliseconds());
+        debugger;
     }
     setTimeout(function() {
         requestAnimationFrame(main);
