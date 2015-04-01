@@ -2,7 +2,7 @@
 
 "use strict"
 
-var c,ctx,img,playMusicBtn,findNotesBtn,musicPlaying,fps,frameCount,difference,greySensitivity,stick,noteSensitivity,allFoundPixels,boundingBox,noteArray,imageData,notePixels,note,borderSensitivity;
+var c,ctx,img,playMusicBtn,findNotesBtn,musicPlaying,difference,greySensitivity,stick,noteSensitivity,allFoundPixels,boundingBox,noteArray,imageData,notePixels,note,borderSensitivity;
 
 window.onload = init;
 
@@ -27,8 +27,6 @@ function init(){
 
     musicPlaying = false;
     img.hidden = true;
-    fps = 60;
-    frameCount = 0;
     difference = 0;
     greySensitivity = 180; // higher is less sensitive
     noteSensitivity = 8; // lower is less sensitive (must be an increment of 4)
@@ -51,7 +49,6 @@ function imageIsLoaded(e) {
 }
 
 function resetEverything(){
-    frameCount = 0;
     difference = 0;
     allFoundPixels = [];
     noteArray = [];
@@ -63,17 +60,22 @@ function resetEverything(){
 
 // 4 seconds with 16 beats. (2 measures of 4/4 time)
 function playMusic(){
-    assignNotes();
     setNoteTimers();
     musicPlaying = true;
     console.log("MusicPlayingStart");
     var d = new Date();
     console.log(d.getSeconds() + ":" + d.getMilliseconds());
+    setTimeout(function(){
+        musicPlaying = false; 
+        var c = new Date();
+        console.log(c.getSeconds() + ":" + c.getMilliseconds());
+        console.log("MusicPlayingFinish");
+    },4000);
 }
 
 function searchForNotes(){
-    var piano = Synth.createInstrument('piano');
-    piano.play('D', 5, 2);
+    // find notes
+    console.log("searchForNotes");
 
     // array of all pixels in image, 4 indexes for each pixel. R,G,B,A - for loop indexes by pixel not value
     imageData = ctx.getImageData(2,2,c.width-4,c.height-4);
@@ -106,8 +108,7 @@ function searchForNotes(){
 
     stick = new Stick(ctx,boundingBox.topLeft.x,boundingBox.topLeft.y,boundingBox.height,boundingBox.width);
 
-    // find notes
-    console.log("searchForNotes");
+    assignNotes();
 }
 
 function removeBorderNotes(){ // removes highlighted pixels around the edges of the screen from being considered for notes
@@ -238,25 +239,11 @@ function main(){
         ctx.fill();
     }
     if(musicPlaying){
-        frameCount++;
         draw();
         update();
     }
-    if(frameCount%60 === 0){
-        var d = new Date();
-        console.log(d.getSeconds() + ":" + d.getMilliseconds());
-    }
-    if(frameCount >= 240){
-        frameCount = 0;
-        musicPlaying = false;
-        console.log("MusicPlayingFinish");
-        var d = new Date();
-        console.log(d.getSeconds() + ":" + d.getMilliseconds());
-        debugger;
-    }
-    setTimeout(function() {
-        requestAnimationFrame(main);
-    }, 1000 / fps);
+    
+    requestAnimationFrame(main);
 }
 
 function update(){
