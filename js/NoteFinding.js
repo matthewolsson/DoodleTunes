@@ -116,13 +116,16 @@ function assignNotes(){
         noteArray[i].timing = percentageX;
     }
 }
+function doSetNoteTimers(note,octave,timing,piano){
+    setTimeout(function(){ 
+        piano.play(note, octave, .5);
+    }, (4000/100)*timing);
+}
 
 function setNoteTimers(){
     var piano = Synth.createInstrument('piano');
     
     for(var i = 0; i < noteArray.length; i++){
-        setTimeout(function(){ 
-            piano.play(noteArray[i].assignedNote, noteArray[i].assignedOctave, .25);
-        }, (4000/100)*noteArray[i].timing);
+        doSetNoteTimers(noteArray[i].assignedNote,noteArray[i].assignedOctave,noteArray[i].timing,piano);
     }
 }
