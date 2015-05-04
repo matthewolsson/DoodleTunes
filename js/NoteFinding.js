@@ -91,24 +91,33 @@ function removeDuplicates(){
     noteArray = noteArray.filter(function(n){ return n != undefined }); // removes undefined values
 }
 
-function assignNotes(){
+function assignNotes(octave){
     var numberOfNotes = 13;
+
+    var high,medium,low; // octaves
+
+    switch(octave){
+        case "High": {high = 5; medium = 4; low = 3;} break;
+        case "Medium": {high = 4; medium = 3; low = 2;} break;
+        case "Low": {high = 3; medium = 2; low = 1;} break;
+    } 
+
     for(var i = 0; i < noteArray.length; i++){
         var adjustedY = noteArray[i].center.y-(boundingBox.topLeft.y+borderSensitivity);
         var percentageY = adjustedY/(boundingBox.height-borderSensitivity)*100;
-        if(percentageY > (100/numberOfNotes*0) && percentageY <= (100/numberOfNotes*1)){noteArray[i].assignedNote = 'E';noteArray[i].assignedOctave = '5';continue; }
-        if(percentageY > (100/numberOfNotes*1) && percentageY <= (100/numberOfNotes*2)){noteArray[i].assignedNote = 'D';noteArray[i].assignedOctave = '5';continue; }
-        if(percentageY > (100/numberOfNotes*2) && percentageY <= (100/numberOfNotes*3)){noteArray[i].assignedNote = 'C';noteArray[i].assignedOctave = '5';continue; }
-        if(percentageY > (100/numberOfNotes*3) && percentageY <= (100/numberOfNotes*4)){noteArray[i].assignedNote = 'B';noteArray[i].assignedOctave = '4';continue; }
-        if(percentageY > (100/numberOfNotes*4) && percentageY <= (100/numberOfNotes*5)){noteArray[i].assignedNote = 'A';noteArray[i].assignedOctave = '4';continue; }
-        if(percentageY > (100/numberOfNotes*5) && percentageY <= (100/numberOfNotes*6)){noteArray[i].assignedNote = 'G';noteArray[i].assignedOctave = '4';continue; }
-        if(percentageY > (100/numberOfNotes*6) && percentageY <= (100/numberOfNotes*7)){noteArray[i].assignedNote = 'F';noteArray[i].assignedOctave = '4';continue; }
-        if(percentageY > (100/numberOfNotes*7) && percentageY <= (100/numberOfNotes*8)){noteArray[i].assignedNote = 'E';noteArray[i].assignedOctave = '4';continue; }
-        if(percentageY > (100/numberOfNotes*8) && percentageY <= (100/numberOfNotes*9)){noteArray[i].assignedNote = 'D';noteArray[i].assignedOctave = '4';continue; }
-        if(percentageY > (100/numberOfNotes*9) && percentageY <= (100/numberOfNotes*10)){noteArray[i].assignedNote = 'C';noteArray[i].assignedOctave = '4';continue; }
-        if(percentageY > (100/numberOfNotes*10) && percentageY <= (100/numberOfNotes*11)){noteArray[i].assignedNote = 'B';noteArray[i].assignedOctave = '3';continue; }
-        if(percentageY > (100/numberOfNotes*11) && percentageY <= (100/numberOfNotes*12)){noteArray[i].assignedNote = 'A';noteArray[i].assignedOctave = '3';continue; }
-        if(percentageY > (100/numberOfNotes*12) && percentageY <= (100/numberOfNotes*13)){noteArray[i].assignedNote = 'G';noteArray[i].assignedOctave = '3';continue; }
+        if(percentageY > (100/numberOfNotes*0) && percentageY <= (100/numberOfNotes*1)){noteArray[i].assignedNote = 'E';noteArray[i].assignedOctave = high;continue; }
+        if(percentageY > (100/numberOfNotes*1) && percentageY <= (100/numberOfNotes*2)){noteArray[i].assignedNote = 'D';noteArray[i].assignedOctave = high;continue; }
+        if(percentageY > (100/numberOfNotes*2) && percentageY <= (100/numberOfNotes*3)){noteArray[i].assignedNote = 'C';noteArray[i].assignedOctave = high;continue; }
+        if(percentageY > (100/numberOfNotes*3) && percentageY <= (100/numberOfNotes*4)){noteArray[i].assignedNote = 'B';noteArray[i].assignedOctave = medium;continue; }
+        if(percentageY > (100/numberOfNotes*4) && percentageY <= (100/numberOfNotes*5)){noteArray[i].assignedNote = 'A';noteArray[i].assignedOctave = medium;continue; }
+        if(percentageY > (100/numberOfNotes*5) && percentageY <= (100/numberOfNotes*6)){noteArray[i].assignedNote = 'G';noteArray[i].assignedOctave = medium;continue; }
+        if(percentageY > (100/numberOfNotes*6) && percentageY <= (100/numberOfNotes*7)){noteArray[i].assignedNote = 'F';noteArray[i].assignedOctave = medium;continue; }
+        if(percentageY > (100/numberOfNotes*7) && percentageY <= (100/numberOfNotes*8)){noteArray[i].assignedNote = 'E';noteArray[i].assignedOctave = medium;continue; }
+        if(percentageY > (100/numberOfNotes*8) && percentageY <= (100/numberOfNotes*9)){noteArray[i].assignedNote = 'D';noteArray[i].assignedOctave = medium;continue; }
+        if(percentageY > (100/numberOfNotes*9) && percentageY <= (100/numberOfNotes*10)){noteArray[i].assignedNote = 'C';noteArray[i].assignedOctave = medium;continue; }
+        if(percentageY > (100/numberOfNotes*10) && percentageY <= (100/numberOfNotes*11)){noteArray[i].assignedNote = 'B';noteArray[i].assignedOctave = low;continue; }
+        if(percentageY > (100/numberOfNotes*11) && percentageY <= (100/numberOfNotes*12)){noteArray[i].assignedNote = 'A';noteArray[i].assignedOctave = low;continue; }
+        if(percentageY > (100/numberOfNotes*12) && percentageY <= (100/numberOfNotes*13)){noteArray[i].assignedNote = 'G';noteArray[i].assignedOctave = low;continue; }
     }
     for(var i = 0; i < noteArray.length; i++){
         var adjustedX = noteArray[i].center.x-boundingBox.topLeft.x;
@@ -116,17 +125,28 @@ function assignNotes(){
         noteArray[i].timing = percentageX;
     }
 }
-function doSetNoteTimers(note,octave,timing,piano){
+function doSetNoteTimers(note,octave,timing,instrument){
     setTimeout(function(){ 
-        piano.play(note, octave, .5);
+        instrument.play(note, octave, .5);
         console.log(note + "" + octave);
     }, (4000/100)*timing);
 }
 
-function setNoteTimers(){
+function setNoteTimers(instrument){
+
     var piano = Synth.createInstrument('piano');
-    
+    var organ = Synth.createInstrument('organ');
+    var acoustic = Synth.createInstrument('acoustic');
+    var edm = Synth.createInstrument('edm');
+
+    switch(instrument){
+        case "Piano": instrument = piano; break;
+        case "Organ": instrument = organ; break;
+        case "Acoustic Guitar": instrument = acoustic; break;
+        case "EDM": instrument = edm; break;
+    }
+
     for(var i = 0; i < noteArray.length; i++){
-        doSetNoteTimers(noteArray[i].assignedNote,noteArray[i].assignedOctave,noteArray[i].timing,piano);
+        doSetNoteTimers(noteArray[i].assignedNote,noteArray[i].assignedOctave,noteArray[i].timing,instrument);
     }
 }

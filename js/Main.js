@@ -2,7 +2,7 @@
 
 "use strict"
 
-var c,ctx,img,playMusicBtn,findNotesBtn,musicPlaying,difference,greySensitivity,stick,noteSensitivity,allFoundPixels,boundingBox,noteArray,imageData,notePixels,note,borderSensitivity;
+var c,ctx,img,playMusicBtn,findNotesBtn,musicPlaying,difference,greySensitivity,stick,noteSensitivity,allFoundPixels,boundingBox,noteArray,imageData,notePixels,note,borderSensitivity,instrumentSelector,instrument,octaveSelector,octave;
 
 window.onload = init;
 
@@ -24,6 +24,13 @@ function init(){
     playMusicBtn.onclick = playMusic;
     findNotesBtn=document.getElementById("findNotes");
     findNotesBtn.onclick = searchForNotes;
+
+    instrumentSelector=document.getElementById("instrument");
+    instrument = instrumentSelector.value;
+    instrumentSelector.onchange = (function(){instrument = instrumentSelector.value;});
+    octaveSelector=document.getElementById("octave");
+    octave = octaveSelector.value;
+    octaveSelector.onchange = (function(){octave = octaveSelector.value;});
 
     musicPlaying = false;
     img.hidden = true;
@@ -56,11 +63,12 @@ function resetEverything(){
     notePixels = [];
     imageData = {};
     boundingBox = {topLeft:{x:999,xIndex:0,y:999,yIndex:0,index:0},bottomRight:{x:0,xIndex:0,y:0,yIndex:0,index:0},height:0,width:0};
+    instrument=document.getElementById("instrument").value;
 }
 
 // 4 seconds with 16 beats. (2 measures of 4/4 time)
 function playMusic(){
-    setNoteTimers();
+    setNoteTimers(instrument);
     musicPlaying = true;
     console.log("MusicPlayingStart");
     var d = new Date();
@@ -69,6 +77,7 @@ function playMusic(){
         musicPlaying = false; 
         var c = new Date();
         console.log(c.getSeconds() + ":" + c.getMilliseconds());
+        drawImage();
         console.log("MusicPlayingFinish");
     },4000);
 }
@@ -108,7 +117,7 @@ function searchForNotes(){
 
     stick = new Stick(ctx,boundingBox.topLeft.x,boundingBox.topLeft.y,boundingBox.height,boundingBox.width);
 
-    assignNotes();
+    assignNotes(octave);
 }
 
 function removeBorderNotes(){ // removes highlighted pixels around the edges of the screen from being considered for notes
@@ -228,8 +237,8 @@ function detectCorners(imageData,index){
 }
 
 function main(){
-    // calculate and draw centers of notes
-    for(var i = 0; i < noteArray.length; i++){
+    // draws the center of notes, can be nixed for final
+    /*for(var i = 0; i < noteArray.length; i++){
         ctx.beginPath();
         ctx.lineWidth = 1;
         ctx.fillStyle = 'purple';
@@ -237,7 +246,7 @@ function main(){
         ctx.closePath();
         ctx.stroke();
         ctx.fill();
-    }
+    }*/
     if(musicPlaying){
         draw();
         update();
