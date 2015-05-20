@@ -7,7 +7,7 @@
     display: block;
     width: 50%;
 }
-#playMusic, #findNotes, #instrument, #octave{
+#playMusic, #instrument, #octave{
 	padding-left: 0;
     padding-right: 0;
     margin-left: auto;
@@ -15,4 +15,13 @@
     margin-top: 2%;
     display: block;
     width: 6%;
+}
+#banner{
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 2%;
+    display: block;  
+    width:30%;
 }

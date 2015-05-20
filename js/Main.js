@@ -2,7 +2,7 @@
 
 "use strict"
 
-var c,ctx,img,playMusicBtn,findNotesBtn,musicPlaying,difference,greySensitivity,stick,noteSensitivity,allFoundPixels,boundingBox,noteArray,imageData,notePixels,note,borderSensitivity,instrumentSelector,instrument,octaveSelector,octave;
+var c,ctx,img,playMusicBtn,musicPlaying,difference,greySensitivity,stick,noteSensitivity,allFoundPixels,boundingBox,noteArray,imageData,notePixels,note,borderSensitivity,instrumentSelector,instrument,octaveSelector,octave;
 
 window.onload = init;
 
@@ -22,8 +22,6 @@ function init(){
     
     playMusicBtn=document.getElementById("playMusic");
     playMusicBtn.onclick = playMusic;
-    findNotesBtn=document.getElementById("findNotes");
-    findNotesBtn.onclick = searchForNotes;
 
     instrumentSelector=document.getElementById("instrument");
     instrument = instrumentSelector.value;
@@ -68,6 +66,7 @@ function resetEverything(){
 
 // 4 seconds with 16 beats. (2 measures of 4/4 time)
 function playMusic(){
+    searchForNotes();
     setNoteTimers(instrument);
     musicPlaying = true;
     console.log("MusicPlayingStart");
